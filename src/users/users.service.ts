@@ -44,21 +44,23 @@ export class UsersService {
         
     }
 
-    // remove(id: string): void {
-
-    //     users = users.filter(u => u.id !== id);
-    // }
-
-    // update(id: string, userData: UpdateUserDto ){
-    //     let user = this.getById(id);
-    //     if(!user) throw new NotFoundException({
-    //         status: HttpStatus.NOT_FOUND,
-    //         error: 'User with requested ID not found, please check the ID input'
-    //     })
-    //     user.name = userData.name || user.name;
-    //     user.login = userData.login || user.login;
-    //     user.password = userData.password || user.password;
-    //     return user;
+    async remove(id: string): Promise<void> {
+        await this.usersRepository.delete(id);
         
-    // }
+    }
+
+    async update(id: string, userData: UpdateUserDto ): Promise<User>{
+        let user = await this.getById(id);
+        if(!user) throw new NotFoundException({
+            status: HttpStatus.NOT_FOUND,
+            error: 'User with requested ID not found, please check the ID input'
+        })
+        user.name = userData.name || user.name;
+        user.login = userData.login || user.login;
+        user.password = userData.password || user.password;
+        await this.usersRepository.save(user);
+
+        return this.getById(id);
+        
+    }
 }

@@ -3,53 +3,96 @@ import {  IBoard } from './board.interface';
 import {v4 as uuidv4 } from 'uuid';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { CreateBoardDto } from './dto/create-board.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Board, ColumnEntity } from './boards.entity';
+import { Repository } from 'typeorm';
 
 
 
-let boards = [{
-    id: "11111111-1111-1111-1111-111111111111" ,
-    title: 'board 1',
-    columns: [
-        { title: 'Backlog', order: 1 },
-        { title: 'Sprint', order: 2 }
-      ]
-}]
+// let boards = [{
+//     id: "11111111-1111-1111-1111-111111111111" ,
+//     title: 'board 1',
+//     columns: [
+//         { title: 'Backlog', order: 1 },
+//         { title: 'Sprint', order: 2 }
+//       ]
+// }]
 
 @Injectable()
 export class BoardsService {
+    constructor(
+        @InjectRepository(Board)
+        private boardsRepository: Repository<Board>) {}
 
-    getAll():IBoard[] {
-        boards.forEach(b => {
-            b.columns.sort((col1, col2) => {
+    async getAll():Promise<Board[]> {
+        let allBoards = await this.boardsRepository.find({relations: ['columns']})
+        allBoards.forEach(board => {
+            board.columns.sort((col1, col2) => {
                 return (col1.order - col2.order);
             })
         })
-        return boards;
+        console.log(allBoards);
+        return allBoards;
     }
 
-    getById(id: string): IBoard {
-        const board = boards.find(b => b.id === id);
+    async getById(id: string): Promise<Board> {
+        const board = await this.boardsRepository.findOne({id: id}, { relations: ['columns']});
+        board.columns.sort((col1, col2) => {
+            return (col1.order - col2.order);
+        })
         return board;
     }
 
-    create(boardData: CreateBoardDto ): IBoard{
-        const board = boardData as unknown as IBoard;
-        board.id = uuidv4();
-        boards.push(board);
-        return this.getById(board.id);
+    async create(boardData: CreateBoardDto ): Promise<Board>{
+       const board = new Board();
+       board.id = uuidv4();
+       board.title = boardData.title;
+       const modCol = boardData.columns.map(({title, order}) => { 
+            const newColEnt = new ColumnEntity();
+            newColEnt.id = uuidv4();
+            newColEnt.title = title;
+            newColEnt.order = order;
+            return newColEnt;   
+        })
+        for(const el of modCol) {
+            await this.boardsRepository.save(el);
+        }
+        board.columns = modCol;
+    
+        await this.boardsRepository.save(board);
+        return board;
+    }
+
+    async remove(id: string): Promise<void> {
+        await this.boardsRepository.delete(id);
+    }
+
+    async update(id: string, boardData: UpdateBoardDto){
+      let board = await this.boardsRepository.findOne({id: id}, { relations: ['columns']});
+      board.title = boardData.title || board.title;
+      if(boardData.columns?.length){
+        const modCol = boardData.columns.map(({id, title, order}) => { 
+            const newColEnt = new ColumnEntity();
+            if(!id){
+                newColEnt.id = uuidv4()
+            }else{
+                newColEnt.id = id;
+            }
+            newColEnt.title = title;
+            newColEnt.order = order; 
+            return newColEnt;
+        })
+        for(const el of modCol) {
+            await this.boardsRepository.save(el);
+        }
+        board.columns = modCol;
+    }
+
+    await this.boardsRepository.save(board);
+
+    return board;
         
-    }
 
-    remove(id: string): void {
-
-        boards = boards.filter(b => b.id !== id);
-    }
-
-    update(id: string, boardData: UpdateBoardDto){
-        let board = this.getById(id);
-        board.title = boardData.title || board.title;
-        board.columns = boardData.columns || board.columns;
-        return board
     }
 
 }

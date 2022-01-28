@@ -5,9 +5,9 @@ export class CreateUserDto {
     name: string
 
     @IsNotEmpty()
-    readonly login: string
+    login: string
 
     @IsNotEmpty()
     @MinLength(3)
-    readonly password: string
+    password: string
 }
