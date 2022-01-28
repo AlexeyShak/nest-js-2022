@@ -22,7 +22,12 @@ import { Repository } from 'typeorm';
 export class BoardsService {
     constructor(
         @InjectRepository(Board)
-        private boardsRepository: Repository<Board>) {}
+        private boardsRepository: Repository<Board>,
+        
+        @InjectRepository(ColumnEntity)
+        private columnReporitory: Repository<ColumnEntity>
+        ) {}
+        
 
     async getAll():Promise<Board[]> {
         let allBoards = await this.boardsRepository.find({relations: ['columns']})
@@ -31,7 +36,7 @@ export class BoardsService {
                 return (col1.order - col2.order);
             })
         })
-        console.log(allBoards);
+        
         return allBoards;
     }
 
@@ -55,7 +60,7 @@ export class BoardsService {
             return newColEnt;   
         })
         for(const el of modCol) {
-            await this.boardsRepository.save(el);
+            await this.columnReporitory.save(el);
         }
         board.columns = modCol;
     
@@ -68,7 +73,7 @@ export class BoardsService {
     }
 
     async update(id: string, boardData: UpdateBoardDto){
-      let board = await this.boardsRepository.findOne({id: id}, { relations: ['columns']});
+      const board = await this.boardsRepository.findOne({id: id}, { relations: ['columns']});
       board.title = boardData.title || board.title;
       if(boardData.columns?.length){
         const modCol = boardData.columns.map(({id, title, order}) => { 
@@ -83,7 +88,7 @@ export class BoardsService {
             return newColEnt;
         })
         for(const el of modCol) {
-            await this.boardsRepository.save(el);
+            await this.columnReporitory.save(el);
         }
         board.columns = modCol;
     }
@@ -91,8 +96,6 @@ export class BoardsService {
     await this.boardsRepository.save(board);
 
     return board;
-        
-
     }
 
 }

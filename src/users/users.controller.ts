@@ -1,17 +1,17 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { TasksService } from 'src/tasks/tasks.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('users')
 export class UsersController {
     constructor(
         private readonly usersServise: UsersService,
-        // private readonly taskServise: TasksService
         ) {}
-
     @Get()
     async getAllUsers(): Promise<User[]> {
         const users = await this.usersServise.getAll();
@@ -48,8 +48,6 @@ export class UsersController {
         @Param('userId') id: string
     ): Promise<void> {
         this.usersServise.remove(id);
-        // this.taskServise.nullUserId(id);
-        
 
     }
     

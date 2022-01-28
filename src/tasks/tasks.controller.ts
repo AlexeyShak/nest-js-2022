@@ -3,12 +3,11 @@ import { BoardsService } from 'src/boards/boards.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { Task } from './task.entity';
-import { ITask } from './task.interfaces';
 import { TasksService } from './tasks.service';
 
 @Controller('boards/:boardId/tasks')
 export class TasksController {
-    constructor(private readonly taskServise: TasksService, private readonly boardsServise: BoardsService ){}
+    constructor(private readonly taskServise: TasksService ){}
 
 
     @Get()
@@ -16,38 +15,38 @@ export class TasksController {
             @Param('boardId') boardId: string
         ):Promise<Task[]> {
 
-            return await this.taskServise.getAll(boardId);
+            return  this.taskServise.getAll(boardId);
         }
     @Get(':taskId')
     async getById( 
         @Param('boardId') boardId: string,
         @Param('taskId') id: string
     ): Promise<Task> {
-        return await this.taskServise.getById(boardId, id);
+        return this.taskServise.getById(boardId, id);
     }
 
-    // @Post()
-    // createBoard(
-    //     @Param('boardId') boardId: string,
-    //     @Body() createTask: CreateTaskDto
-    // ): ITask{
-    //     return this.taskServise.create(boardId, createTask)
-    // }
+    @Post()
+    async createTask(
+        @Param('boardId') boardId: string,
+        @Body() createTask: CreateTaskDto
+    ):Promise<Task>{
+        return  this.taskServise.create(boardId, createTask)
+    }
 
-    // @Put(':boardId')
-    // updateUser(
-    //     @Param('boardId') boardId: string,
-    //     @Param('taskId') id: string,
-    //     @Body() updateTask: UpdateTaskDto
-    // ){
-    //     return this.taskServise.update(boardId, id, updateTask);
-    // }
+    @Put(':boardId')
+    async updateTask(
+        @Param('boardId') boardId: string,
+        @Param('taskId') id: string,
+        @Body() updateTask: UpdateTaskDto
+    ):Promise<Task>{
+        return await this.taskServise.update(boardId, id, updateTask);
+    }
 
-    // @Delete(':boardId')
-    // @HttpCode(HttpStatus.NO_CONTENT)
-    // removeUser(
-    //     @Param('taskId') id: string
-    // ): void {
-    //     this.boardsServise.remove(id)
-    // }
+    @Delete(':taskId')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async removeTask(
+        @Param('taskId') id: string
+    ): Promise<void> {
+        this.taskServise.remove(id)
+    }
 }

@@ -31,7 +31,7 @@ export class BoardsController {
     }
 
     @Put(':boardId')
-    async updateUser(
+    async updateBoard(
         @Param('boardId') id: string,
         @Body() updateBoard: UpdateBoardDto
     ){
@@ -40,7 +40,7 @@ export class BoardsController {
 
     @Delete(':boardId')
     @HttpCode(HttpStatus.NO_CONTENT)
-    async removeUser(
+    async removeBoard(
         @Param('boardId') id: string
     ): Promise<void>{
         this.boardsServise.remove(id)

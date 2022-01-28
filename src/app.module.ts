@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/user.entity';
 import { Board, ColumnEntity } from './boards/boards.entity';
 import { Task } from './tasks/task.entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -19,11 +20,12 @@ import { Task } from './tasks/task.entity';
       password: '111',
       database: 'postgres',
       entities: [User, Board, Task, ColumnEntity],
-      synchronize: true
+      synchronize: false
     }),
     UsersModule, 
     BoardsModule, 
-    TasksModule],
+    TasksModule, 
+    AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })

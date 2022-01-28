@@ -6,14 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './user.entity';
-import { IUser, IUserCreate } from './user.interface';
 
-let users = [{
-    id: '11111111-0000-0000-0000-000000000000',
-    name: 'admin',
-    login: 'admin',
-    password: 'admin'
-}]
 
 @Injectable()
 export class UsersService {
@@ -27,9 +20,7 @@ export class UsersService {
     }
 
     async getById(id: string): Promise<User> {
-        return this.usersRepository.findOne(id);
-    
-         
+        return this.usersRepository.findOne(id);  
     }
 
     async create(userData:CreateUserDto ): Promise<User> {
@@ -45,8 +36,9 @@ export class UsersService {
     }
 
     async remove(id: string): Promise<void> {
+
         await this.usersRepository.delete(id);
-        
+
     }
 
     async update(id: string, userData: UpdateUserDto ): Promise<User>{
@@ -63,4 +55,8 @@ export class UsersService {
         return this.getById(id);
         
     }
+    async getByLogin(login:string): Promise<User | undefined> {
+        return this.usersRepository.findOne({login});
+    }
 }
+

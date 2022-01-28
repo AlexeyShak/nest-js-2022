@@ -1,32 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { ITask } from './task.interfaces';
 import {v4 as uuidv4 } from 'uuid';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './task.entity';
 import { Repository } from 'typeorm';
 
-let tasks = [
-    {
-        id: '00000000-0000-0000-0000-000000000000' ,
-        title: 'task 1',
-        order: 1,
-        description: 'task description',
-        userId: '11111111-0000-0000-0000-000000000000',
-        boardId: "11111111-1111-1111-1111-111111111111",
-        columnId: null
-    }
-] as ITask[]
+
 
 @Injectable()
 export class TasksService {
     constructor(
         @InjectRepository(Task)
-        private tasksRepository: Repository<Task>) {}
+        private tasksRepository: Repository<Task>,
+        ) {}
 
     async getAll(boardId: string):Promise<Task[]> {
         const boardTasks = await this.tasksRepository.find({boardId: boardId});
+        console.log(boardTasks);
         return boardTasks;
     }
 
@@ -36,39 +27,35 @@ export class TasksService {
         return task;
     }
 
-    // create(boardId: string, taskData: CreateTaskDto ): ITask {
-    //     const task = taskData;
-    //     task.id = uuidv4();
-    //     if(task.boardId === null){
-    //         task.boardId = boardId;
-    //     }
-    //     tasks.push(task);
-    //     return this.getById(boardId, task.id);
+    async create(boardId: string, taskData: CreateTaskDto ): Promise<Task> {
+        const task = new Task();
+        task.id = uuidv4();
+        task.title = taskData.title;
+        task.order = taskData.order;
+        task.description = taskData.description;
+        task.userId = taskData.userId
+        task.boardId = boardId;
+        task.columnId = taskData.columnId;
+        await this.tasksRepository.save(task)
+        return this.getById(boardId, task.id);
         
-    // }
+    }
 
-    // remove( id: string): void {
+    async remove( id: string): Promise<void> {
+        this.tasksRepository.delete(id);
+    }
 
-    //     tasks = tasks.filter(t => t.id !== id);
-    // }
+    async update(boardId: string, id: string, taskData: UpdateTaskDto ):Promise<Task>{
+        let task = await this.getById(boardId, id);
+        task.title = taskData.title || task.title;
+        task.order = taskData.order || task.order;
+        task.description = taskData.description || task.description;
+        task.boardId = taskData.boardId || task.boardId;
+        task.userId = taskData.userId || task.userId;
+        task.columnId = taskData.columnId || task.columnId;
 
-    // update(boardId: string, id: string, taskData: UpdateTaskDto ): ITask{
-    //     let task = this.getById(boardId, id);
-    //     task.title = taskData.title || task.title;
-    //     task.order = taskData.order || task.order;
-    //     task.description = taskData.description || task.description;
-    //     task.boardId = taskData.boardId || task.boardId;
-    //     task.userId = taskData.userId || task.userId;
-    //     task.columnId = taskData.columnId || task.columnId
-    //     return task;
+        await this.tasksRepository.save(task)
+        return task;
         
-    // }
-        
-    // nullUserId(userId: string):void {
-    //     tasks.forEach(t => {
-    //         if(t.userId === userId){
-    //             t.userId = null;
-    //         }
-    //     })
-    // }
+    }
 }
