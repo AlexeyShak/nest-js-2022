@@ -1,10 +1,9 @@
-import 'reflect-metadata'
+import 'reflect-metadata';
 import { Task } from 'src/tasks/task.entity';
-import { Entity, Column, PrimaryColumn, OneToMany} from 'typeorm';
+import { Entity, Column, PrimaryColumn, OneToMany } from 'typeorm';
 
-
-@Entity({name: 'users'})
-export class User  {
+@Entity({ name: 'users' })
+export class User {
   @PrimaryColumn()
   id!: string;
 

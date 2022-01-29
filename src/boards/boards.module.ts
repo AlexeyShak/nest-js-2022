@@ -10,6 +10,6 @@ import { BoardsService } from './boards.service';
 @Module({
   imports: [TypeOrmModule.forFeature([User, Board, Task, ColumnEntity])],
   controllers: [BoardsController],
-  providers: [BoardsService, UsersService]
+  providers: [BoardsService, UsersService],
 })
 export class BoardsModule {}

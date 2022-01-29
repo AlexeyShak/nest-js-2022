@@ -1,25 +1,21 @@
-import { IsNotEmpty,  IsUUID } from "class-validator"
-
+import { IsNotEmpty, IsUUID } from 'class-validator';
 
 export class CreateTaskDto {
+  id?: string;
 
-    id?: string
+  @IsNotEmpty()
+  title: string;
 
-    @IsNotEmpty()
-    title: string
+  @IsNotEmpty()
+  order: number;
 
-    @IsNotEmpty()
-    order: number
+  @IsNotEmpty()
+  description: string;
 
-    @IsNotEmpty()
-    description: string
+  userId: string | null;
 
-   
-    userId: string | null
+  @IsUUID()
+  boardId: string;
 
-    @IsUUID() 
-    boardId: string
-
-
-    columnId: string | null
+  columnId: string | null;
 }

@@ -7,12 +7,10 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
-} from 'typeorm'
-
-
+} from 'typeorm';
 
 @Entity()
-export class Task  {
+export class Task {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 

@@ -8,9 +8,6 @@ import {
   ManyToOne,
 } from 'typeorm';
 
-
-
-
 @Entity()
 export class Board {
   @PrimaryGeneratedColumn('uuid')

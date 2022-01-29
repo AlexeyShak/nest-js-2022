@@ -12,8 +12,8 @@ import { LocalStrategy } from './local.strategy';
       secret: '111',
       signOptions: { expiresIn: '24h' },
     }),
-    ],
+  ],
   providers: [AuthService, LocalStrategy, JwtStrategy],
-  exports:[AuthService, JwtModule]
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

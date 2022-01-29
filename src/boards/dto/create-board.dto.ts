@@ -1,10 +1,10 @@
-import { IsArray, IsNotEmpty } from "class-validator"
-import { ColumnInterface } from "../board.interface"
+import { IsArray, IsNotEmpty } from 'class-validator';
+import { ColumnInterface } from '../board.interface';
 
 export class CreateBoardDto {
-    @IsNotEmpty()
-    title: string
+  @IsNotEmpty()
+  title: string;
 
-    @IsArray()
-    columns: ColumnInterface[]   
+  @IsArray()
+  columns: ColumnInterface[];
 }

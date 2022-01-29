@@ -9,6 +9,7 @@ import { User } from './users/user.entity';
 import { Board, ColumnEntity } from './boards/boards.entity';
 import { Task } from './tasks/task.entity';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -20,12 +21,14 @@ import { AuthModule } from './auth/auth.module';
       password: '111',
       database: 'postgres',
       entities: [User, Board, Task, ColumnEntity],
-      synchronize: false
+      synchronize: false,
     }),
-    UsersModule, 
-    BoardsModule, 
-    TasksModule, 
-    AuthModule],
+    ConfigModule.forRoot(),
+    UsersModule,
+    BoardsModule,
+    TasksModule,
+    AuthModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

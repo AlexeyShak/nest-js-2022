@@ -1,0 +1,37 @@
+version: '3'
+services:
+  app:
+      build: .
+      ports:
+       - "${PORT}:${PORT}"
+      command: npm run start:dev
+      volumes:
+        - .:/src
+        - nodemodules:/src/node_modules
+        - ./logs:/src/logs
+      restart: always
+      networks: 
+      - custom_host
+  database:
+    build: db
+    ports:
+     - "${PG_PORT}:${PG_PORT}"
+    environment:
+      POSTGRES_PASSWORD: "${PG_PASSWORD}"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes: 
+      - pgdata:/var/lib/postgresql/data/pgdata
+    restart: always
+    networks: 
+      - custom_host
+    depends_on: 
+      - app
+volumes:
+  nodemodules: {}
+  pgdata: {}
+networks:
+  custom_host:
+    driver: bridge
+
+
+
