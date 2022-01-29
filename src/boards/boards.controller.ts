@@ -1,12 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
-import { IUser } from 'src/users/user.interface';
-import { UsersService } from 'src/users/users.service';
-import { IBoard } from './board.interface';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { Board } from './boards.entity';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('boards')
 export class BoardsController {
     constructor(private readonly boardsServise: BoardsService ){}

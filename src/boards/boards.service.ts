@@ -1,5 +1,4 @@
 import {  Injectable} from '@nestjs/common';
-import {  IBoard } from './board.interface';
 import {v4 as uuidv4 } from 'uuid';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { CreateBoardDto } from './dto/create-board.dto';
