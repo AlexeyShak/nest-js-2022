@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { CreateBoardDto } from './dto/create-board.dto';
@@ -43,6 +43,12 @@ export class BoardsService {
       { id: id },
       { relations: ['columns'] }
     );
+    if(!board){
+      throw new NotFoundException({
+        status: HttpStatus.NOT_FOUND,
+        error: 'Board with requested ID not found, please check the ID input',
+      });
+    } 
     board.columns.sort((col1, col2) => {
       return col1.order - col2.order;
     });
@@ -70,6 +76,12 @@ export class BoardsService {
   }
 
   async remove(id: string): Promise<void> {
+    const board = await this.boardsRepository.findOne(id);
+    if(!board)
+    throw new NotFoundException({
+      status: HttpStatus.NOT_FOUND,
+      error: 'Board with requested ID not found, please check the ID input',
+    });
     await this.boardsRepository.delete(id);
   }
 

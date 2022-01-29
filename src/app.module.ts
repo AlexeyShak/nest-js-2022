@@ -15,13 +15,13 @@ import { ConfigModule } from '@nestjs/config';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
+      host: 'nest-js-2022_database_1',
       port: 5432,
       username: 'postgres',
       password: '111',
       database: 'postgres',
       entities: [User, Board, Task, ColumnEntity],
-      synchronize: false,
+      synchronize: true,
     }),
     ConfigModule.forRoot(),
     UsersModule,

@@ -42,7 +42,7 @@ export class TasksController {
     return this.taskServise.create(boardId, createTask);
   }
 
-  @Put(':boardId')
+  @Put(':taskId')
   async updateTask(
     @Param('boardId') boardId: string,
     @Param('taskId') id: string,
@@ -53,7 +53,10 @@ export class TasksController {
 
   @Delete(':taskId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async removeTask(@Param('taskId') id: string): Promise<void> {
-    this.taskServise.remove(id);
+  async removeTask(
+    @Param('boardId') boardId: string,
+    @Param('taskId') id: string
+    ): Promise<void> {
+    this.taskServise.remove(boardId, id);
   }
 }

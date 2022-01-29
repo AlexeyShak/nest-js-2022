@@ -14,7 +14,7 @@ export class CreateTaskDto {
 
   userId: string | null;
 
-  @IsUUID()
+
   boardId: string;
 
   columnId: string | null;

@@ -14,12 +14,12 @@ export class User {
   login!: string;
 
   @Column()
-  password!: string;
+  password?: string;
 
   @OneToMany(() => Task, (task) => task.user)
-  tasks!: Task[];
+  tasks?: Task[];
 
-  toResponse() {
+  toResponse?() {
     return {
       id: this.id,
       name: this.name,

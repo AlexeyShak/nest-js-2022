@@ -17,12 +17,19 @@ export class UsersService {
   ) {}
 
   async getAll(): Promise<User[]> {
-      this.logger.log('getALl');
-    return this.usersRepository.find();
+    this.logger.log('getALl');
+    let users = await this.usersRepository.find();
+    return users.map(user => user.toResponse());
   }
 
   async getById(id: string): Promise<User> {
-    return this.usersRepository.findOne(id);
+    let user = await this.usersRepository.findOne(id);
+    if(!user)
+    throw new NotFoundException({
+      status: HttpStatus.NOT_FOUND,
+      error: 'User with requested ID not found, please check the ID input',
+    });
+    return user.toResponse()
   }
 
   async create(userData: CreateUserDto): Promise<User> {
