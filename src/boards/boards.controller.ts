@@ -8,14 +8,17 @@ import {
   Param,
   Post,
   Put,
+  UseFilters,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { CustomFilter } from 'src/custom.filter';
 import { Board } from './boards.entity';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 
+@UseFilters(new CustomFilter())
 @UseGuards(AuthGuard('jwt'))
 @Controller('boards')
 export class BoardsController {
@@ -46,6 +49,6 @@ export class BoardsController {
   @Delete(':boardId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeBoard(@Param('boardId') id: string): Promise<void> {
-    this.boardsServise.remove(id);
+   return await this.boardsServise.remove(id);
   }
 }

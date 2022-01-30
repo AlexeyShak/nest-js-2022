@@ -10,28 +10,34 @@ import { Board, ColumnEntity } from './boards/boards.entity';
 import { Task } from './tasks/task.entity';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
-import {PG_USER, PG_DATABASE, PG_PASSWORD, PG_PORT} from './config/config'
-import { UsersService } from './users/users.service';
+import { FileModule } from './file/file.module';
+
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'nest-js-2022_database_1',
-      port: PG_PORT,
-      username: 'postgres',
-      password: '111',
-      database: 'postgres',
+      host: 'localhost',
+      port: parseInt(process.env.PG_PORT as string),
+      username: process.env.PG_USER,
+      password: process.env.PG_PASSWORD,
+      database: process.env.PG_DATABASE,
       entities: [User, Board, Task, ColumnEntity],
       synchronize: true,
     }),
-    ConfigModule.forRoot(),
     UsersModule,
     BoardsModule,
     TasksModule,
-    AuthModule
+    AuthModule,
+    FileModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(){
+    console.log('PG_PASS', process.env.PG_PASSWORD, typeof process.env.PG_PASSWORD)
+
+  }
+}

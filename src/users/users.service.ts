@@ -43,16 +43,18 @@ export class UsersService {
   }
 
   async remove(id: string): Promise<void> {
+    await this.getById(id);
     await this.usersRepository.delete(id);
   }
 
   async update(id: string, userData: UpdateUserDto): Promise<User> {
     const user = await this.getById(id);
-    if (!user)
+    if (!user){
       throw new NotFoundException({
         status: HttpStatus.NOT_FOUND,
         error: 'User with requested ID not found, please check the ID input',
       });
+    }
     user.name = userData.name || user.name;
     user.login = userData.login || user.login;
     user.password = userData.password || user.password;
