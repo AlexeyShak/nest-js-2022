@@ -23,6 +23,7 @@ export class UsersController {
   constructor(private readonly usersServise: UsersService) {}
   @Get()
   async getAllUsers(): Promise<User[]> {
+    console.log('BBBBB!')
     const users = await this.usersServise.getAll();
     return users;
   }

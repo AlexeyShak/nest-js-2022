@@ -15,9 +15,8 @@ export class UsersService {
     @InjectRepository(User)
     private usersRepository: Repository<User>
   ) {}
-
+  
   async getAll(): Promise<User[]> {
-    this.logger.log('getALl');
     let users = await this.usersRepository.find();
     return users.map(user => user.toResponse());
   }
@@ -63,5 +62,19 @@ export class UsersService {
   }
   async getByLogin(login: string): Promise<User | undefined> {
     return this.usersRepository.findOne({ login });
+  }
+
+  async createAdminUser(): Promise<void> {
+    const hashPassword = await bcrypt.hash('admin', 3);
+    const existingAdmin = await this.usersRepository.findOne({login:'admin'});
+    if(!existingAdmin){
+      const admin = new User();
+      admin.id = uuidv4();
+      admin.name = 'admin';
+      admin.login = 'admin';
+      admin.password = hashPassword;
+      await this.usersRepository.save(admin);
+    }
+    
   }
 }

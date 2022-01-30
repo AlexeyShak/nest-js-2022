@@ -10,13 +10,15 @@ import { Board, ColumnEntity } from './boards/boards.entity';
 import { Task } from './tasks/task.entity';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import {PG_USER, PG_DATABASE, PG_PASSWORD, PG_PORT} from './config/config'
+import { UsersService } from './users/users.service';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'nest-js-2022_database_1',
-      port: 5432,
+      port: PG_PORT,
       username: 'postgres',
       password: '111',
       database: 'postgres',
