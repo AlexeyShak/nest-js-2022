@@ -1,47 +1,54 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
-import { IUser } from 'src/users/user.interface';
-import { UsersService } from 'src/users/users.service';
-import { IBoard } from './board.interface';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  UseFilters,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { CustomFilter } from 'src/custom.filter';
+import { Board } from './boards.entity';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 
+@UseFilters(new CustomFilter())
+@UseGuards(AuthGuard('jwt'))
 @Controller('boards')
 export class BoardsController {
-    constructor(private readonly boardsServise: BoardsService ){}
+  constructor(private readonly boardsServise: BoardsService) {}
 
+  @Get()
+  async getAll(): Promise<Board[]> {
+    return await this.boardsServise.getAll();
+  }
+  @Get('/:boardId')
+  async getById(@Param('boardId') id: string): Promise<Board> {
+    return await this.boardsServise.getById(id);
+  }
 
-    @Get()
-        getAll():IBoard[] {
-            return this.boardsServise.getAll();
-        }
-    @Get('/:boardId')
-    getById( 
-        @Param('boardId') id: string
-    ): IBoard {
-        return this.boardsServise.getById(id);
-    }
+  @Post()
+  async createBoard(@Body() createBoard: CreateBoardDto): Promise<Board> {
+    return await this.boardsServise.create(createBoard);
+  }
 
-    @Post()
-    createBoard(
-        @Body() createBoard: CreateBoardDto
-    ): IBoard {
-        return this.boardsServise.create(createBoard)
-    }
+  @Put(':boardId')
+  async updateBoard(
+    @Param('boardId') id: string,
+    @Body() updateBoard: UpdateBoardDto
+  ) {
+    return await this.boardsServise.update(id, updateBoard);
+  }
 
-    @Put(':boardId')
-    updateUser(
-        @Param('boardId') id: string,
-        @Body() updateBoard: UpdateBoardDto
-    ){
-        return this.boardsServise.update(id, updateBoard);
-    }
-
-    @Delete(':boardId')
-    @HttpCode(HttpStatus.NO_CONTENT)
-    removeUser(
-        @Param('boardId') id: string
-    ): void {
-        this.boardsServise.remove(id)
-    }
+  @Delete(':boardId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeBoard(@Param('boardId') id: string): Promise<void> {
+   return await this.boardsServise.remove(id);
+  }
 }

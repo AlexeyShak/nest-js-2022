@@ -1,64 +1,82 @@
-import { HttpStatus, Injectable, NotFoundException} from '@nestjs/common';
+import { HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './user.entity';
-import { IUser, IUserCreate } from './user.interface';
-
-let users = [{
-    id: '11111111-0000-0000-0000-000000000000',
-    name: 'admin',
-    login: 'admin',
-    password: 'admin'
-}]
 
 @Injectable()
 export class UsersService {
-    constructor(
-        @InjectRepository(User)
-        private usersRepository: Repository<User>
-    ) {}
 
-    async getAll(): Promise<User[]> {
-        return this.usersRepository.find();
+    private readonly logger = new Logger(UsersService.name);
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>
+  ) {}
+  
+  async getAll(): Promise<User[]> {
+    let users = await this.usersRepository.find();
+    return users.map(user => user.toResponse());
+  }
+
+  async getById(id: string): Promise<User> {
+    let user = await this.usersRepository.findOne(id);
+    if(!user)
+    throw new NotFoundException({
+      status: HttpStatus.NOT_FOUND,
+      error: 'User with requested ID not found, please check the ID input',
+    });
+    return user.toResponse()
+  }
+
+  async create(userData: CreateUserDto): Promise<User> {
+    const hashPassword = await bcrypt.hash(userData.password, 3);
+    const user = new User();
+    user.id = uuidv4();
+    user.name = userData.name;
+    user.login = userData.login;
+    user.password = hashPassword;
+    await this.usersRepository.save(user);
+    return this.getById(user.id);
+  }
+
+  async remove(id: string): Promise<void> {
+    await this.getById(id);
+    await this.usersRepository.delete(id);
+  }
+
+  async update(id: string, userData: UpdateUserDto): Promise<User> {
+    const user = await this.getById(id);
+    if (!user){
+      throw new NotFoundException({
+        status: HttpStatus.NOT_FOUND,
+        error: 'User with requested ID not found, please check the ID input',
+      });
     }
+    user.name = userData.name || user.name;
+    user.login = userData.login || user.login;
+    user.password = userData.password || user.password;
+    await this.usersRepository.save(user);
 
-    async getById(id: string): Promise<User> {
-        return this.usersRepository.findOne(id);
+    return this.getById(id);
+  }
+  async getByLogin(login: string): Promise<User | undefined> {
+    return this.usersRepository.findOne({ login });
+  }
+
+  async createAdminUser(): Promise<void> {
+    const hashPassword = await bcrypt.hash('admin', 3);
+    const existingAdmin = await this.usersRepository.findOne({login:'admin'});
+    if(!existingAdmin){
+      const admin = new User();
+      admin.id = uuidv4();
+      admin.name = 'admin';
+      admin.login = 'admin';
+      admin.password = hashPassword;
+      await this.usersRepository.save(admin);
+    }
     
-         
-    }
-
-    async create(userData:CreateUserDto ): Promise<User> {
-        const hashPassword = await bcrypt.hash(userData.password, 3);
-        const user = new User();
-        user.id = uuidv4();
-        user.name = userData.name;
-        user.login = userData.login;
-        user.password = hashPassword;
-        await this.usersRepository.save(user);
-        return this.getById(user.id);
-        
-    }
-
-    // remove(id: string): void {
-
-    //     users = users.filter(u => u.id !== id);
-    // }
-
-    // update(id: string, userData: UpdateUserDto ){
-    //     let user = this.getById(id);
-    //     if(!user) throw new NotFoundException({
-    //         status: HttpStatus.NOT_FOUND,
-    //         error: 'User with requested ID not found, please check the ID input'
-    //     })
-    //     user.name = userData.name || user.name;
-    //     user.login = userData.login || user.login;
-    //     user.password = userData.password || user.password;
-    //     return user;
-        
-    // }
+  }
 }

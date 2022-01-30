@@ -1,52 +1,62 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { BoardsService } from 'src/boards/boards.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { ITask } from './task.interfaces';
+import { Task } from './task.entity';
 import { TasksService } from './tasks.service';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('boards/:boardId/tasks')
 export class TasksController {
-    constructor(private readonly taskServise: TasksService, private readonly boardsServise: BoardsService ){}
+  constructor(private readonly taskServise: TasksService) {}
 
+  @Get()
+  async getAll(@Param('boardId') boardId: string): Promise<Task[]> {
+    return this.taskServise.getAll(boardId);
+  }
+  @Get(':taskId')
+  async getById(
+    @Param('boardId') boardId: string,
+    @Param('taskId') id: string
+  ): Promise<Task> {
+    return this.taskServise.getById(boardId, id);
+  }
 
-    @Get()
-        getAll(
-            @Param('boardId') boardId: string
-        ):ITask[] {
+  @Post()
+  async createTask(
+    @Param('boardId') boardId: string,
+    @Body() createTask: CreateTaskDto
+  ): Promise<Task> {
+    return this.taskServise.create(boardId, createTask);
+  }
 
-            return this.taskServise.getAll(boardId);
-        }
-    @Get(':taskId')
-    getById( 
-        @Param('boardId') boardId: string,
-        @Param('taskId') id: string
-    ): ITask {
-        return this.taskServise.getById(boardId, id);
-    }
+  @Put(':taskId')
+  async updateTask(
+    @Param('boardId') boardId: string,
+    @Param('taskId') id: string,
+    @Body() updateTask: UpdateTaskDto
+  ): Promise<Task> {
+    return await this.taskServise.update(boardId, id, updateTask);
+  }
 
-    @Post()
-    createBoard(
-        @Param('boardId') boardId: string,
-        @Body() createTask: CreateTaskDto
-    ): ITask{
-        return this.taskServise.create(boardId, createTask)
-    }
-
-    @Put(':boardId')
-    updateUser(
-        @Param('boardId') boardId: string,
-        @Param('taskId') id: string,
-        @Body() updateTask: UpdateTaskDto
-    ){
-        return this.taskServise.update(boardId, id, updateTask);
-    }
-
-    @Delete(':boardId')
-    @HttpCode(HttpStatus.NO_CONTENT)
-    removeUser(
-        @Param('taskId') id: string
-    ): void {
-        this.boardsServise.remove(id)
-    }
+  @Delete(':taskId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeTask(
+    @Param('boardId') boardId: string,
+    @Param('taskId') id: string
+    ): Promise<void> {
+    this.taskServise.remove(boardId, id);
+  }
 }

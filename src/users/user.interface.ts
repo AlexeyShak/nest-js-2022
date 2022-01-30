@@ -1,9 +1,9 @@
 export interface IUser extends IUserCreate {
-    id: string
+  id: string;
 }
 
 export interface IUserCreate {
-    name: string,
-    login: string,
-    password: string
+  name: string;
+  login: string;
+  password: string;
 }

@@ -1,67 +1,82 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { ITask } from './task.interfaces';
-import {v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { UpdateTaskDto } from './dto/update-task.dto';
-
-let tasks = [
-    {
-        id: '00000000-0000-0000-0000-000000000000' ,
-        title: 'task 1',
-        order: 1,
-        description: 'task description',
-        userId: '11111111-0000-0000-0000-000000000000',
-        boardId: "11111111-1111-1111-1111-111111111111",
-        columnId: null
-    }
-] as ITask[]
+import { InjectRepository } from '@nestjs/typeorm';
+import { Task } from './task.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TasksService {
-    getAll(boardId: string):ITask[] {
-        const boardTasks = tasks.filter(t => t.boardId === boardId);
-        return boardTasks;
-    }
+  constructor(
+    @InjectRepository(Task)
+    private tasksRepository: Repository<Task>
+  ) {}
 
-    getById(boardId: string, id: string): ITask {
-        const boardTasks = tasks.filter(t => t.boardId === boardId);
-        const task = boardTasks.find(t => t.id === id);
-        return task;
-    }
+  async getAll(boardId: string): Promise<Task[]> {
+    const boardTasks = await this.tasksRepository.find({ boardId: boardId });
+    console.log(boardTasks);
+    return boardTasks;
+  }
 
-    create(boardId: string, taskData: CreateTaskDto ): ITask {
-        const task = taskData;
-        task.id = uuidv4();
-        if(task.boardId === null){
-            task.boardId = boardId;
-        }
-        tasks.push(task);
-        return this.getById(boardId, task.id);
-        
-    }
+  async getById(boardId: string, id: string): Promise<Task> {
+    const boardTasks = await this.tasksRepository.find({ boardId: boardId });
+    const task = boardTasks.find((t) => t.id === id);
+    if(!task)
+    throw new NotFoundException({
+      status: HttpStatus.NOT_FOUND,
+      error: 'Task with requested ID not found, please check the ID input',
+    });
+    return task;
+  }
 
-    remove( id: string): void {
+  async create(boardId: string, taskData: CreateTaskDto): Promise<Task> {
+    const task = new Task();
+    task.id = uuidv4();
+    task.title = taskData.title;
+    task.order = taskData.order;
+    task.description = taskData.description;
+    task.userId = taskData.userId;
+    if(!taskData.boardId){
+      task.boardId = boardId
+    }
+    else {task.boardId = boardId;}
+    task.columnId = taskData.columnId;
+    await this.tasksRepository.save(task);
+    return this.getById(boardId, task.id);
+  }
 
-        tasks = tasks.filter(t => t.id !== id);
-    }
+  async remove(boardId: string, id: string): Promise<void> {
+    const boardTasks = await this.tasksRepository.find({ boardId: boardId });
+    if(!boardTasks)
+    throw new NotFoundException({
+      status: HttpStatus.NOT_FOUND,
+      error: 'No tasks on that board, please check the ID input',
+    });
+    const task = boardTasks.find((t) => t.id === id);
+    if(!task)
+      throw new NotFoundException({
+        status: HttpStatus.NOT_FOUND,
+        error: 'Task with requested ID not found, please check the ID input',
+      });
+    this.tasksRepository.delete({id:task.id});
+  }
 
-    update(boardId: string, id: string, taskData: UpdateTaskDto ): ITask{
-        let task = this.getById(boardId, id);
-        task.title = taskData.title || task.title;
-        task.order = taskData.order || task.order;
-        task.description = taskData.description || task.description;
-        task.boardId = taskData.boardId || task.boardId;
-        task.userId = taskData.userId || task.userId;
-        task.columnId = taskData.columnId || task.columnId
-        return task;
-        
-    }
-        
-    nullUserId(userId: string):void {
-        tasks.forEach(t => {
-            if(t.userId === userId){
-                t.userId = null;
-            }
-        })
-    }
+  async update(
+    boardId: string,
+    id: string,
+    taskData: UpdateTaskDto
+  ): Promise<Task> {
+    const task = await this.getById(boardId, id);
+    console.log('TASKDATA:', taskData, task);
+    task.title = taskData.title || task.title;
+    task.order = taskData.order || task.order;
+    task.description = taskData.description || task.description;
+    task.boardId = taskData.boardId || task.boardId;
+    task.userId = taskData.userId || task.userId;
+    task.columnId = taskData.columnId || task.columnId;
+
+    await this.tasksRepository.save(task);
+    return task;
+  }
 }
